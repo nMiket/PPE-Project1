@@ -14,7 +14,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     ObserveModule.forRoot({
       appKey: 'YOUR_APP_KEY',
       appSecret: 'YOUR_APP_SECRET',
-      serviceId: 'back-nest-deportes',
+      serviceId: 'back-nest-peliculas',
     }),
     AuthModule,
     UsersModule,
