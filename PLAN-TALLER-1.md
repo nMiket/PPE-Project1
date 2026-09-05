@@ -32,20 +32,20 @@ PPE-Project1/
 
 ### Faltantes o incompletos
 
-| Requisito | Estado | Qué falta |
-|---|---|---|
-| Modelo del tema con id, nombre e imagen | Pendiente | Elegir el dominio y crear el modelo Prisma. |
-| CRUD REST completo | Pendiente | Crear módulo, controller, service y DTOs del recurso. |
-| Prisma 7 + SQLite | Pendiente | Instalar/configurar Prisma, `schema.prisma`, migración y servicio Prisma. |
-| Proyecto Vue | Pendiente | Crear el frontend y conectarlo a la API. |
-| Búsqueda por nombre | Pendiente | Filtro en API y control en Vue. |
-| Paginación | Pendiente | Parámetros `page` y `limit` en API y controles en Vue. |
-| Registro de usuarios | Pendiente | DTO, endpoint y persistencia en base de datos. |
-| Contraseñas hasheadas | Pendiente | Usar `bcrypt` o `argon2`; actualmente se comparan contraseñas en texto plano. |
-| Login completo | Parcial | Firma JWT, pero usa usuarios en memoria y secreto escrito en el código. |
-| Protección de escritura | Parcial | Existe un guard global, pero hay que declarar públicas las rutas de lectura y registro. |
-| Sesión en Vue | Pendiente | Guardar token, interceptor/header, navegación privada y logout. |
-| `.env.example` y README | Pendiente | Documentar variables, instalación, migraciones y ejecución de ambos proyectos. |
+| Requisito                               | Estado    | Qué falta                                                                               |
+| --------------------------------------- | --------- | ---------------------------------------------------------------------------------------- |
+| Modelo del tema con id, nombre e imagen | Pendiente | Elegir el dominio y crear el modelo Prisma.                                              |
+| CRUD REST completo                      | Pendiente | Crear módulo, controller, service y DTOs del recurso.                                   |
+| Prisma 7 + SQLite                       | Pendiente | Instalar/configurar Prisma,`schema.prisma`, migración y servicio Prisma.              |
+| Proyecto Vue                            | Pendiente | Crear el frontend y conectarlo a la API.                                                 |
+| Búsqueda por nombre                    | Pendiente | Filtro en API y control en Vue.                                                          |
+| Paginación                             | Pendiente | Parámetros`page` y `limit` en API y controles en Vue.                               |
+| Registro de usuarios                    | Pendiente | DTO, endpoint y persistencia en base de datos.                                           |
+| Contraseñas hasheadas                  | Pendiente | Usar`bcrypt` o `argon2`; actualmente se comparan contraseñas en texto plano.        |
+| Login completo                          | Parcial   | Firma JWT, pero usa usuarios en memoria y secreto escrito en el código.                 |
+| Protección de escritura                | Parcial   | Existe un guard global, pero hay que declarar públicas las rutas de lectura y registro. |
+| Sesión en Vue                          | Pendiente | Guardar token, interceptor/header, navegación privada y logout.                         |
+| `.env.example` y README               | Pendiente | Documentar variables, instalación, migraciones y ejecución de ambos proyectos.         |
 
 ## 2. Decisión del dominio
 
@@ -134,33 +134,33 @@ Para este taller conviene comenzar con un diseño pequeño y sólido. Las tablas
 
 ### Tabla `User` — obligatoria
 
-| Columna | Tipo | Reglas | Propósito |
-|---|---|---|---|
-| `id` | `Int` | PK, autoincremental | Identificador del usuario. |
-| `username` | `String` | Único, no nulo | Nombre usado para registrarse e iniciar sesión. |
-| `email` | `String` | Único, opcional o requerido | Permite identificar al usuario y ampliar el login en el futuro. |
-| `passwordHash` | `String` | No nulo | Contraseña hasheada; nunca guardar `password` en texto plano. |
-| `role` | `String` o enum | Por defecto `USER` | Permite distinguir usuarios normales y administradores si se necesita. |
-| `createdAt` | `DateTime` | Valor automático | Fecha de registro. |
-| `updatedAt` | `DateTime` | Actualización automática | Fecha del último cambio. |
+| Columna          | Tipo              | Reglas                       | Propósito                                                             |
+| ---------------- | ----------------- | ---------------------------- | ---------------------------------------------------------------------- |
+| `id`           | `Int`           | PK, autoincremental          | Identificador del usuario.                                             |
+| `username`     | `String`        | Único, no nulo              | Nombre usado para registrarse e iniciar sesión.                       |
+| `email`        | `String`        | Único, opcional o requerido | Permite identificar al usuario y ampliar el login en el futuro.        |
+| `passwordHash` | `String`        | No nulo                      | Contraseña hasheada; nunca guardar`password` en texto plano.        |
+| `role`         | `String` o enum | Por defecto`USER`          | Permite distinguir usuarios normales y administradores si se necesita. |
+| `createdAt`    | `DateTime`      | Valor automático            | Fecha de registro.                                                     |
+| `updatedAt`    | `DateTime`      | Actualización automática   | Fecha del último cambio.                                              |
 
 Para mantener el taller sencillo, `username`, `passwordHash`, `createdAt` y `updatedAt` son suficientes. `email` y `role` son recomendados, pero no deben retrasar el CRUD.
 
 ### Tabla `Movie` — obligatoria
 
-| Columna | Tipo | Reglas | Propósito |
-|---|---|---|---|
-| `id` | `Int` | PK, autoincremental | Identificador de la película. |
-| `title` | `String` | No nulo | Título que se muestra y por el que se busca. |
-| `description` | `String` | No nulo | Sinopsis de la película. |
-| `ageRating` | `String` | No nulo | Clasificación de edad. |
-| `durationMinutes` | `Int` | Positivo | Duración en minutos. |
-| `originalLanguage` | `String` | No nulo | Idioma original. |
-| `cast` | `String` | No nulo | Reparto inicial como texto separado por comas. |
-| `image` | `String` | No nulo | URL del póster o imagen. |
-| `releaseDate` | `DateTime` | Opcional | Fecha de estreno. |
-| `createdAt` | `DateTime` | Valor automático | Fecha de creación. |
-| `updatedAt` | `DateTime` | Actualización automática | Fecha de la última edición. |
+| Columna              | Tipo         | Reglas                     | Propósito                                     |
+| -------------------- | ------------ | -------------------------- | ---------------------------------------------- |
+| `id`               | `Int`      | PK, autoincremental        | Identificador de la película.                 |
+| `title`            | `String`   | No nulo                    | Título que se muestra y por el que se busca.  |
+| `description`      | `String`   | No nulo                    | Sinopsis de la película.                      |
+| `ageRating`        | `String`   | No nulo                    | Clasificación de edad.                        |
+| `durationMinutes`  | `Int`      | Positivo                   | Duración en minutos.                          |
+| `originalLanguage` | `String`   | No nulo                    | Idioma original.                               |
+| `cast`             | `String`   | No nulo                    | Reparto inicial como texto separado por comas. |
+| `image`            | `String`   | No nulo                    | URL del póster o imagen.                      |
+| `releaseDate`      | `DateTime` | Opcional                   | Fecha de estreno.                              |
+| `createdAt`        | `DateTime` | Valor automático          | Fecha de creación.                            |
+| `updatedAt`        | `DateTime` | Actualización automática | Fecha de la última edición.                  |
 
 El requisito mínimo se cumple con `id`, `title` e `image`. Los demás campos permiten un CRUD de películas más completo sin crear demasiadas tablas.
 
@@ -168,11 +168,11 @@ El requisito mínimo se cumple con `id`, `title` e `image`. Los demás campos pe
 
 Solo conviene agregarlas si necesitan más variedad de datos o quieren demostrar una relación `N:M`:
 
-| Columna | Tipo | Reglas | Propósito |
-|---|---|---|---|
-| `id` | `Int` | PK, autoincremental | Identificador del género o actor. |
-| `name` | `String` | Único, no nulo | Nombre del género o actor. |
-| `createdAt` | `DateTime` | Valor automático | Fecha de creación. |
+| Columna       | Tipo         | Reglas              | Propósito                         |
+| ------------- | ------------ | ------------------- | ---------------------------------- |
+| `id`        | `Int`      | PK, autoincremental | Identificador del género o actor. |
+| `name`      | `String`   | Único, no nulo     | Nombre del género o actor.        |
+| `createdAt` | `DateTime` | Valor automático   | Fecha de creación.                |
 
 `MovieActor` tendría `movieId` y `actorId` como claves foráneas. No es necesario crear un CRUD completo de estas tablas para cumplir el taller; pueden cargarse como datos iniciales o dejarse para una segunda fase.
 
@@ -244,13 +244,13 @@ Elegir REST API y generar CRUD. Adaptar los archivos generados:
 
 Endpoints esperados:
 
-| Método | Ruta | Acceso | Uso |
-|---|---|---|---|
-| `GET` | `/movies?page=1&limit=10&search=matrix` | Público | Listar, buscar por título y paginar. |
-| `GET` | `/movies/:id` | Público | Consultar una película. |
-| `POST` | `/movies` | JWT | Crear. |
-| `PATCH` | `/movies/:id` | JWT | Editar. |
-| `DELETE` | `/movies/:id` | JWT | Eliminar. |
+| Método    | Ruta                                      | Acceso   | Uso                                   |
+| ---------- | ----------------------------------------- | -------- | ------------------------------------- |
+| `GET`    | `/movies?page=1&limit=10&search=matrix` | Público | Listar, buscar por título y paginar. |
+| `GET`    | `/movies/:id`                           | Público | Consultar una película.              |
+| `POST`   | `/movies`                               | JWT      | Crear.                                |
+| `PATCH`  | `/movies/:id`                           | JWT      | Editar.                               |
+| `DELETE` | `/movies/:id`                           | JWT      | Eliminar.                             |
 
 Para `findAll`, calcular `skip = (page - 1) * limit`, filtrar por `title` con búsqueda insensible a mayúsculas y devolver:
 
