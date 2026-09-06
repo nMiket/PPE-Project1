@@ -19,20 +19,23 @@ interface ApiMovie {
 
 type MoviePayload = Omit<ApiMovie, 'id'>
 
+const cleanText = (value: string | null | undefined) =>
+  (value ?? '').replace(/\?/g, '').replace(/\s+/g, ' ').trim()
+
 const toMovie = (movie: ApiMovie): Movie => ({
   id: movie.id,
-  titulo: movie.title,
-  director: movie.director,
-  reparto: movie.cast,
-  genero: movie.genre,
-  clasificacion_edad: movie.ageRating,
+  titulo: cleanText(movie.title),
+  director: cleanText(movie.director),
+  reparto: cleanText(movie.cast),
+  genero: cleanText(movie.genre),
+  clasificacion_edad: cleanText(movie.ageRating),
   fecha_estreno: movie.releaseDate?.slice(0, 10) ?? '',
   duracion: movie.durationMinutes,
-  sinopsis: movie.synopsis,
-  poster_url: movie.image,
+  sinopsis: cleanText(movie.synopsis),
+  poster_url: movie.image?.trim() ?? '',
   calificacion: movie.rating,
-  idioma: movie.originalLanguage,
-  pais: movie.country,
+  idioma: cleanText(movie.originalLanguage),
+  pais: cleanText(movie.country),
 })
 
 const toPayload = (movie: Omit<Movie, 'id'>): MoviePayload => ({
