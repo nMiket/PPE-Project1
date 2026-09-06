@@ -1,26 +1,50 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
+import { PrismaService } from '../prisma/prisma.service.js';
 
-//This should be a real class/interface representing a user entity
-export type User = any;
+export type User = {
+    id: number;
+    username: string;
+    password: string;
+};
 
 @Injectable()
 export class UsersService {
 
-    private readonly users: User[] = [
-        {
-            userId: 1,
-            username: 'john',
-            passwordHash: '$2b$10$1bwnDdAoe0pDNzCg/5q6ouFiq4HHw1JLKM0UVE2z3thw/.B1EG5Ie',
-        },
-        {
-            userId: 2,
-            username: 'maria',
-            passwordHash: '$2b$10$ZK95YmQq4DfZ6JLnqp.SMeoxx6YAohFQAb.p5fKSzpPvIxL3OhRQu',
-        }
-    ];
+    constructor(private readonly prisma: PrismaService) {}
 
-    async findOne(username: string): Promise<User | undefined> {
-        return this.users.find(user => user.username === username);
+    async findOne(username: string): Promise<User | null> {
+        return this.prisma.user.findUnique({
+            where: { username },
+        });
+    }
+
+    async create(username: string, password: string): Promise<Omit<User, 'password'>> {
+        try {
+            const user = await this.prisma.user.create({
+                data: {
+                    username,
+                    password: await bcrypt.hash(password, 10),
+                },
+            });
+
+            const { password: _password, ...publicUser } = user;
+            return publicUser;
+        } catch (error) {
+            if (this.isUniqueConstraintError(error)) {
+                throw new ConflictException('El nombre de usuario ya está registrado');
+            }
+            throw error;
+        }
+    }
+
+    private isUniqueConstraintError(error: unknown): boolean {
+        return (
+            typeof error === 'object' &&
+            error !== null &&
+            'code' in error &&
+            error.code === 'P2002'
+        );
     }
 
 }

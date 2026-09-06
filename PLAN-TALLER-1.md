@@ -369,18 +369,18 @@ npm run build
 
 ## 5. Checklist de aceptación
 
-- [ ] El repositorio contiene `back-nest-peliculas` y `front-vue-peliculas`.
-- [ ] Prisma usa SQLite y existe una migración reproducible.
-- [ ] `Movie` tiene `id`, `title` e `image`, además de los campos cinematográficos.
+- [X] El repositorio contiene `back-nest-peliculas` y `front-vue-peliculas`.
+- [X] Prisma usa SQLite y existe una migración reproducible.
+- [X] `Movie` tiene `id`, `title` e `image`, además de los campos cinematográficos.
 - [ ] Las cuatro operaciones del CRUD funcionan desde Vue.
 - [ ] La lista busca por nombre y pagina resultados.
-- [ ] El registro guarda una contraseña hasheada.
-- [ ] El login devuelve un JWT firmado desde una variable de entorno.
-- [ ] Crear, editar y eliminar requieren JWT.
-- [ ] Vue persiste el token, envía el header y protege rutas.
-- [ ] Logout elimina la sesión.
-- [ ] Existe `.env.example` sin secretos reales.
-- [ ] README permite levantar ambos proyectos desde cero.
+- [X] El registro guarda una contraseña hasheada.
+- [X] El login devuelve un JWT firmado desde una variable de entorno.
+- [X] Crear, editar y eliminar requieren JWT.
+- [X] Vue persiste el token, envía el header y protege rutas.
+- [X] Logout elimina la sesión.
+- [X] Existe `.env.example` sin secretos reales.
+- [X] README permite levantar ambos proyectos desde cero.
 - [ ] Se probó la demostración: registro, login, listar, crear, editar y eliminar.
 
 ## 6. Prioridad inmediata
