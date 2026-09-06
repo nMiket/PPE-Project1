@@ -71,6 +71,13 @@ async function submitLogin() {
         </button>
       </form>
 
+      <p class="register-prompt">
+        ¿No tienes usuario?
+        <button type="button" class="register-link" @click="router.push('/register')">
+          Regístrate aquí
+        </button>
+      </p>
+
       <p class="login-note">Descubre, explora y evalua películas para saber cuáles realmente valen la pena ver.</p>
     </section>
 
@@ -206,6 +213,26 @@ async function submitLogin() {
 .submit-button:disabled {
   cursor: not-allowed;
   opacity: 0.7;
+}
+
+.register-prompt {
+  margin: 22px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+  text-align: center;
+}
+
+.register-link {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #2563eb;
+  font-weight: 700;
+}
+
+.register-link:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
 }
 
 .login-note {

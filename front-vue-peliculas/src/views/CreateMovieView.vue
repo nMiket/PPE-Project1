@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Navbar from '../components/Navbar.vue'
 import MovieForm from '../components/MovieForm.vue'
@@ -12,6 +12,7 @@ const router = useRouter()
 const moviesStore = useMoviesStore()
 const showSuccessModal = ref(false)
 const successMessage = ref('')
+const errorMessage = ref('')
 
 const editing = computed(() => {
   return Boolean(route.params.id)
@@ -23,21 +24,36 @@ const movieToEdit = computed(() => {
   return moviesStore.getMovieById(Number(route.params.id))
 })
 
-const saveMovie = (movieData: Omit<Movie, 'id'>) => {
-  if (editing.value && movieToEdit.value) {
-    moviesStore.updateMovie({
-      id: movieToEdit.value.id,
-      ...movieData,
-    })
-
-    successMessage.value = 'La película se actualizó correctamente.'
-  } else {
-    moviesStore.addMovie(movieData)
-
-    successMessage.value = 'La película se creó correctamente.'
+onMounted(async () => {
+  if (editing.value && !movieToEdit.value) {
+    try {
+      await moviesStore.loadMovie(Number(route.params.id))
+    } catch {
+      errorMessage.value = 'No fue posible cargar la película.'
+    }
   }
+})
 
-  showSuccessModal.value = true
+const saveMovie = async (movieData: Omit<Movie, 'id'>) => {
+  errorMessage.value = ''
+
+  try {
+    if (editing.value && movieToEdit.value) {
+      await moviesStore.updateMovie({
+        id: movieToEdit.value.id,
+        ...movieData,
+      })
+
+      successMessage.value = 'La película se actualizó correctamente.'
+    } else {
+      await moviesStore.addMovie(movieData)
+      successMessage.value = 'La película se creó correctamente.'
+    }
+
+    showSuccessModal.value = true
+  } catch {
+    errorMessage.value = 'No fue posible guardar la película.'
+  }
 }
 
 const closeSuccessModal = () => {
@@ -79,6 +95,10 @@ const cancel = () => {
         @submit="saveMovie"
         @cancel="cancel"
       />
+
+      <p v-if="errorMessage" class="form-error" role="alert">
+        {{ errorMessage }}
+      </p>
 
       <div
         v-if="showSuccessModal"
