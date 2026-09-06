@@ -7,7 +7,7 @@ Aplicación web para administrar un catálogo de películas. El proyecto está d
 - `back-nest-peliculas`: API REST desarrollada con NestJS.
 - `front-vue-peliculas`: interfaz desarrollada con Vue y Vite.
 
-Actualmente el backend incluye autenticación JWT y comparación de contraseñas mediante `bcrypt`. Los usuarios son provisionales y todavía están definidos en memoria. La persistencia con Prisma y SQLite queda como el siguiente bloque de implementación.
+El backend incluye autenticación JWT, contraseñas protegidas con `bcrypt` y persistencia con Prisma sobre SQLite. La aplicación permite registrar usuarios y administrar películas mediante un CRUD protegido.
 
 ## Tecnologías
 
@@ -16,8 +16,8 @@ Actualmente el backend incluye autenticación JWT y comparación de contraseñas
 - NestJS
 - JWT
 - bcrypt
-- Prisma 7, pendiente de completar
-- SQLite, pendiente de completar
+- Prisma 7
+- SQLite
 - TypeScript
 
 ### Frontend
@@ -128,27 +128,30 @@ http://localhost:5173
 
 Deben estar ejecutándose las dos aplicaciones al mismo tiempo: NestJS en el puerto `3000` y Vue en el puerto `5173`.
 
-## Usuarios provisionales
+## Usuarios y autenticación
 
-Actualmente los usuarios están definidos en memoria dentro de `UsersService`. Todavía no se crean desde un formulario ni se guardan en SQLite.
+Los usuarios se guardan en SQLite mediante Prisma. El registro crea un hash bcrypt; las contraseñas no se almacenan en texto plano.
 
-### Usuario 1
-
-```text
-Usuario: john
-Contraseña: changeme
-```
-
-### Usuario 2
+En la base local actual existen estos usuarios de desarrollo:
 
 ```text
-Usuario: maria
-Contraseña: guess
+Usuarios: luis, Andres, Wombat
+Contraseña: 123456
 ```
 
-Las contraseñas se comparan utilizando `bcrypt.compare()` contra un `passwordHash`. No se guardan las contraseñas originales en texto plano.
+Registrar un usuario nuevo:
 
-Estos usuarios son temporales. Al implementar Prisma y SQLite, deberán reemplazarse por registros persistidos en la tabla `User`.
+```http
+POST /auth/register
+Content-Type: application/json
+```
+
+```json
+{
+  "username": "nuevo-usuario",
+  "password": "123456"
+}
+```
 
 ## Inicio de sesión
 
@@ -162,8 +165,8 @@ Cuerpo de la petición:
 
 ```json
 {
-  "username": "john",
-  "password": "changeme"
+  "username": "luis",
+  "password": "123456"
 }
 ```
 
@@ -181,14 +184,49 @@ El frontend guarda el token en `localStorage` y lo envía en las siguientes peti
 Authorization: Bearer <token>
 ```
 
-## Endpoints actuales
+## Endpoints
 
 | Método | Ruta | Descripción |
 |---|---|---|
 | `POST` | `/auth/login` | Iniciar sesión y recibir un JWT. |
+| `POST` | `/auth/register` | Registrar un usuario nuevo. |
 | `GET` | `/auth/profile` | Consultar el perfil usando un JWT. |
+| `POST` | `/peliculas` | Crear una película usando un JWT. |
+| `GET` | `/peliculas` | Listar todas las películas usando un JWT. |
+| `GET` | `/peliculas/:id` | Consultar una película usando un JWT. |
+| `PATCH` | `/peliculas/:id` | Actualizar una película usando un JWT. |
+| `DELETE` | `/peliculas/:id` | Eliminar una película usando un JWT. |
 
-El endpoint de login es público. El endpoint de perfil requiere un token válido.
+Los endpoints de login y registro son públicos. El perfil y todas las rutas de películas requieren un token válido:
+
+```http
+Authorization: Bearer <access_token>
+```
+
+Ejemplo para crear una película:
+
+```http
+POST http://localhost:3000/peliculas
+Content-Type: application/json
+Authorization: Bearer <access_token>
+```
+
+```json
+{
+  "title": "Interestelar",
+  "director": "Christopher Nolan",
+  "cast": "Matthew McConaughey, Anne Hathaway, Jessica Chastain",
+  "genre": "Ciencia ficción",
+  "ageRating": "PG-13",
+  "releaseDate": "2014-11-07",
+  "durationMinutes": 169,
+  "synopsis": "Un grupo de astronautas viaja a través de un agujero de gusano para encontrar un nuevo hogar para la humanidad.",
+  "country": "Estados Unidos",
+  "originalLanguage": "Inglés",
+  "rating": 8.7,
+  "image": "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg"
+}
+```
 
 ## Comandos útiles
 
@@ -212,30 +250,18 @@ npm run preview
 
 ## Prisma y SQLite
 
-Prisma debe instalarse dentro de `back-nest-peliculas`, nunca en la carpeta general ni en el frontend:
+El esquema de Prisma define los modelos `user` y `Pelicula`. La base local se encuentra en `back-nest-peliculas/dev.db` y usa la URL definida en `DATABASE_URL`.
+
+Para aplicar migraciones y regenerar el cliente después de modificar el esquema:
 
 ```powershell
 cd back-nest-peliculas
-npm install prisma@7 @prisma/client@7
-npx prisma init --datasource-provider sqlite
-```
-
-Después de crear `prisma/schema.prisma` y definir los modelos:
-
-```powershell
 npx prisma migrate dev --name init
 npx prisma generate
 ```
 
-La base de datos SQLite quedará en el backend, según la ruta definida en `DATABASE_URL`.
-
 ## Próximas funcionalidades
 
-- Crear el modelo `Movie` con título, descripción, clasificación de edad, duración, idioma, reparto e imagen.
-- Persistir usuarios en SQLite mediante Prisma.
-- Crear el registro de usuarios.
-- Hashear contraseñas nuevas con `bcrypt.hash(password, 10)`.
-- Implementar el CRUD completo de películas.
 - Implementar búsqueda por título.
 - Implementar paginación.
 - Completar las operaciones de películas desde Vue.
