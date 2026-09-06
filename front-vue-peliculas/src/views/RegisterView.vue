@@ -8,25 +8,35 @@ const router = useRouter()
 const authStore = useAuthStore()
 const username = ref('')
 const password = ref('')
+const confirmPassword = ref('')
 const errorMessage = ref('')
 const isSubmitting = ref(false)
+const isRegistered = ref(false)
 
-async function submitLogin() {
+async function submitRegister() {
   errorMessage.value = ''
 
-  if (!username.value.trim() || !password.value) {
-    errorMessage.value = 'Escribe tu usuario y contraseña.'
+  if (!username.value.trim() || !password.value || !confirmPassword.value) {
+    errorMessage.value = 'Completa todos los campos.'
+    return
+  }
+
+  if (password.value !== confirmPassword.value) {
+    errorMessage.value = 'Las contraseñas no coinciden.'
     return
   }
 
   isSubmitting.value = true
 
   try {
-    await authStore.login(username.value.trim(), password.value)
-    await router.push('/movies')
+    await authStore.register(username.value.trim(), password.value)
+    isRegistered.value = true
   } catch (error) {
     const responseError = error as AxiosError<{ message?: string }>
-    errorMessage.value = responseError.response?.data?.message ?? 'No fue posible iniciar sesión.'
+    const message = responseError.response?.data?.message
+    errorMessage.value = Array.isArray(message)
+      ? message.join(' ')
+      : message ?? 'No fue posible crear el usuario.'
   } finally {
     isSubmitting.value = false
   }
@@ -35,50 +45,77 @@ async function submitLogin() {
 
 <template>
   <main class="login-shell">
-    <section class="login-panel" aria-labelledby="login-title">
+    <section class="login-panel" aria-labelledby="register-title">
       <div class="brand-mark" aria-hidden="true">M</div>
       <p class="eyebrow">Movie Radar</p>
-      <h1 id="login-title">Bienvenido de nuevo</h1>
-      <p class="login-intro">Entra para administrar tu catálogo de películas.</p>
+      <h1 id="register-title">Crea tu usuario</h1>
+      <p class="login-intro">Regístrate para administrar tu catálogo de películas.</p>
 
-      <form class="login-form" @submit.prevent="submitLogin" novalidate>
-        <label for="username">Usuario</label>
+      <div v-if="isRegistered" class="success-message" role="status">
+        <strong>Usuario creado correctamente.</strong>
+        <span>Ya puedes iniciar sesión con tus credenciales.</span>
+      </div>
+
+      <form v-else class="login-form" @submit.prevent="submitRegister" novalidate>
+        <label for="register-username">Usuario</label>
         <input
-          id="username"
+          id="register-username"
           v-model="username"
           name="username"
           type="text"
           autocomplete="username"
-          placeholder="Escribe tu usuario"
+          placeholder="Elige un usuario"
           required
         />
 
-        <label for="password">Contraseña</label>
+        <label for="register-password">Contraseña</label>
         <input
-          id="password"
+          id="register-password"
           v-model="password"
           name="password"
           type="password"
-          autocomplete="current-password"
-          placeholder="Escribe tu contraseña"
+          autocomplete="new-password"
+          placeholder="Crea una contraseña"
           required
         />
 
-        <p v-if="errorMessage" class="form-error" role="alert">{{ errorMessage }}</p>
+        <label for="confirm-password">Repite la contraseña</label>
+        <input
+          id="confirm-password"
+          v-model="confirmPassword"
+          name="confirm-password"
+          type="password"
+          autocomplete="new-password"
+          placeholder="Repite tu contraseña"
+          required
+        />
+
+        <p v-if="errorMessage" class="form-error" role="alert">
+          {{ errorMessage }}
+        </p>
 
         <button class="submit-button" type="submit" :disabled="isSubmitting">
-          {{ isSubmitting ? 'Ingresando...' : 'Iniciar sesión' }}
+          {{ isSubmitting ? 'Creando usuario...' : 'Crear usuario' }}
         </button>
       </form>
 
+      <button
+        v-if="isRegistered"
+        class="submit-button"
+        type="button"
+        @click="router.push('/login')"
+      >
+        Ir al inicio de sesión
+      </button>
+
       <p class="register-prompt">
-        ¿No tienes usuario?
-        <button type="button" class="register-link" @click="router.push('/register')">
-          Regístrate aquí
+        ¿Ya tienes usuario?
+        <button type="button" class="register-link" @click="router.push('/login')">
+          Inicia sesión
         </button>
       </p>
 
-      <p class="login-note">Descubre, explora y evalua películas para saber cuáles realmente valen la pena ver.</p>
+      <p class="login-note">Descubre, explora y evalúa películas para saber cuáles realmente valen la pena ver.</p>
     </section>
 
     <aside class="login-art" aria-label="Colección de películas">
@@ -178,14 +215,26 @@ async function submitLogin() {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
-.form-error {
+.form-error,
+.success-message {
   margin: 12px 0 4px;
   padding: 11px 13px;
   border-radius: 8px;
-  background: #fef2f2;
-  color: #b91c1c;
   font-size: 14px;
   font-weight: 600;
+}
+
+.form-error {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.success-message {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: #ecfdf5;
+  color: #047857;
 }
 
 .submit-button {
@@ -291,28 +340,6 @@ async function submitLogin() {
   font-size: 42px;
   font-weight: 800;
   line-height: 1.15;
-}
-
-.film-strip {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  gap: 12px;
-  margin-top: 40px;
-}
-
-.film-strip span {
-  width: 90px;
-  height: 55px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #374151;
-  border-radius: 6px;
-  background: #1f2937;
-  color: #6b7280;
-  font-size: 13px;
-  font-weight: 700;
 }
 
 @media (max-width: 800px) {
