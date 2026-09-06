@@ -2,6 +2,96 @@
 
 Aplicación web para administrar un catálogo de películas. El proyecto está dividido en un backend NestJS y un frontend Vue.
 
+## Puesta en marcha desde GitHub
+
+Estos son los pasos para ejecutar el proyecto después de descargarlo o clonarlo desde GitHub.
+
+### 1. Clonar el repositorio
+
+Requisitos previos: Node.js, npm y Git instalados.
+
+```powershell
+git clone https://github.com/nMiket/PPE-Project1.git
+cd PPE-Project1
+```
+
+En Windows PowerShell, si `npm` está bloqueado por la política de ejecución, usar `npm.cmd` en los comandos siguientes.
+
+### 2. Preparar el backend
+
+En una terminal, desde la raíz del proyecto:
+
+```powershell
+cd back-nest-peliculas
+npm install
+npx prisma generate
+Copy-Item .env.example .env
+```
+
+Revisar `back-nest-peliculas/.env` y mantener, como mínimo, esta configuración local:
+
+```env
+PORT=3000
+JWT_SECRET=local-development-secret-change-before-sharing
+JWT_EXPIRES_IN=1d
+DATABASE_URL=file:./dev.db
+```
+
+`JWT_SECRET` debe cambiarse por un valor privado en cualquier entorno compartido o de producción. Para preparar una base de datos nueva usando las migraciones:
+
+```powershell
+npx prisma migrate deploy
+```
+
+Iniciar el backend y dejar esta terminal abierta:
+
+```powershell
+npm run start:dev
+```
+
+La API quedará disponible en `http://localhost:3000`.
+
+### 3. Preparar el frontend
+
+Abrir una segunda terminal desde la raíz del repositorio:
+
+```powershell
+cd front-vue-peliculas
+npm install
+Copy-Item .env.example .env
+```
+
+Confirmar que `front-vue-peliculas/.env` tenga la URL del backend:
+
+```env
+VITE_API_URL=http://localhost:3000
+```
+
+Iniciar Vue:
+
+```powershell
+npm run dev
+```
+
+Abrir la URL que muestre Vite, normalmente `http://localhost:5173`. El backend y el frontend deben permanecer ejecutándose al mismo tiempo.
+
+### 4. Primer uso
+
+1. Abrir `/register` o seleccionar el enlace de registro desde el login.
+2. Crear un usuario con contraseña y confirmación de contraseña.
+3. Iniciar sesión.
+4. Consultar, crear, editar y eliminar películas desde el catálogo.
+
+Para comprobar que todo está listo antes de ejecutar la aplicación, se pueden construir ambos proyectos:
+
+```powershell
+# Desde back-nest-peliculas
+npm run build
+
+# Desde front-vue-peliculas
+npm run build
+```
+
 ## Proyectos
 
 - `back-nest-peliculas`: API REST desarrollada con NestJS.
@@ -132,6 +222,8 @@ Deben estar ejecutándose las dos aplicaciones al mismo tiempo: NestJS en el pue
 
 Los usuarios se guardan en SQLite mediante Prisma. El registro crea un hash bcrypt; las contraseñas no se almacenan en texto plano.
 
+Desde el login se puede abrir la pantalla de registro. El formulario solicita usuario, contraseña y confirmación de contraseña antes de llamar a `POST /auth/register`. La confirmación se valida en el frontend y el hash de la contraseña se genera en el backend.
+
 En la base local actual existen estos usuarios de desarrollo:
 
 ```text
@@ -228,6 +320,20 @@ Authorization: Bearer <access_token>
 }
 ```
 
+## Frontend
+
+El frontend consume la API mediante Axios. Después del login guarda el JWT en `localStorage` y lo añade automáticamente como encabezado `Authorization` en las peticiones protegidas.
+
+La vista de películas permite:
+
+- Listar las películas obtenidas desde `GET /peliculas`.
+- Crear, editar y eliminar películas mediante los endpoints correspondientes.
+- Ver el detalle de cada película.
+- Filtrar por título, género, director, idioma, país, clasificación y rango de calificación.
+- Paginar los resultados en bloques de seis películas.
+
+Los filtros se ejecutan actualmente en el frontend sobre el catálogo cargado. Los valores separados por comas se convierten en opciones individuales, se eliminan duplicados ignorando mayúsculas y acentos, y se limpian signos `?` y espacios inconsistentes provenientes de la base de datos.
+
 ## Comandos útiles
 
 ### Backend
@@ -262,9 +368,8 @@ npx prisma generate
 
 ## Próximas funcionalidades
 
-- Implementar búsqueda por título.
-- Implementar paginación.
-- Completar las operaciones de películas desde Vue.
-- Añadir rutas privadas y cierre de sesión completo.
+- Mover los filtros y la paginación al backend si el catálogo crece considerablemente.
+- Añadir validaciones DTO más estrictas para las peticiones de películas.
+- Configurar variables y secretos específicos para producción.
 
 Consulta [PLAN-TALLER-1.md](PLAN-TALLER-1.md) para ver el diagnóstico y el orden detallado de implementación.

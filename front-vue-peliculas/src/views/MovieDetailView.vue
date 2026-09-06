@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Navbar from '../components/Navbar.vue'
 import { useMoviesStore } from '../stores/movies'
@@ -9,6 +9,7 @@ const route = useRoute()
 const router = useRouter()
 const moviesStore = useMoviesStore()
 const showDeleteModal = ref(false)
+const errorMessage = ref('')
 
 const askDelete = () => {
   showDeleteModal.value = true
@@ -18,16 +19,30 @@ const cancelDelete = () => {
   showDeleteModal.value = false
 }
 
-const confirmDelete = () => {
+const confirmDelete = async () => {
   if (!movie.value) return
 
-  moviesStore.deleteMovie(movie.value.id)
-  showDeleteModal.value = false
-  router.push('/movies')
+  try {
+    await moviesStore.deleteMovie(movie.value.id)
+    showDeleteModal.value = false
+    await router.push('/movies')
+  } catch {
+    errorMessage.value = 'No fue posible eliminar la película.'
+  }
 }
 
 const movie = computed(() => {
   return moviesStore.getMovieById(Number(route.params.id))
+})
+
+onMounted(async () => {
+  if (!movie.value) {
+    try {
+      await moviesStore.loadMovie(Number(route.params.id))
+    } catch {
+      errorMessage.value = 'No fue posible cargar la película.'
+    }
+  }
 })
 
 const editMovie = () => {
@@ -51,6 +66,9 @@ const getRecommendation = (calificacion: number) => {
     <Navbar />
 
     <main v-if="movie" class="detail-content">
+      <p v-if="errorMessage" class="form-error" role="alert">
+        {{ errorMessage }}
+      </p>
       <button class="back-button" @click="goBack">
         ← Volver a películas
       </button>

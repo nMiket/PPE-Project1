@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import Navbar from '../components/Navbar.vue'
 import MovieCard from '../components/MovieCard.vue'
 import MovieFilters from '../components/MovieFilters.vue'
@@ -8,7 +8,7 @@ import type { Movie } from '../types/movie'
 
 const moviesStore = useMoviesStore()
 
-const filteredMovies = ref<Movie[]>([...moviesStore.movies])
+const filteredMovies = ref<Movie[]>([])
 
 const currentPage = ref(1)
 const moviesPerPage = 6
@@ -17,6 +17,15 @@ const updateMovies = (movies: Movie[]) => {
   filteredMovies.value = movies
   currentPage.value = 1
 }
+
+onMounted(async () => {
+  try {
+    await moviesStore.loadMovies()
+    updateMovies(moviesStore.movies)
+  } catch {
+    filteredMovies.value = []
+  }
+})
 
 const totalPages = computed(() => {
   return Math.ceil(filteredMovies.value.length / moviesPerPage)

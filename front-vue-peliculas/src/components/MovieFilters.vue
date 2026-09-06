@@ -26,51 +26,74 @@ const filters = reactive({
   calificacionMax: '',
 })
 
+const normalize = (value: string) =>
+  value
+    .replace(/\?/g, '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase()
+
+const splitValues = (value: string) =>
+  value
+    .split(',')
+    .map((item) => item.replace(/\?/g, '').replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+
+const uniqueValues = (values: string[]) => {
+  const unique = new Map<string, string>()
+
+  values.flatMap(splitValues).forEach((value) => {
+    const key = normalize(value)
+    if (key && !unique.has(key)) unique.set(key, value)
+  })
+
+  return [...unique.values()]
+}
+
+const includesValue = (value: string, selected: string) =>
+  splitValues(value).some((item) => normalize(item) === normalize(selected))
+
 const genres = computed(() => {
-  return [...new Set(props.movies.map((movie) => movie.genero))]
+  return uniqueValues(props.movies.map((movie) => movie.genero))
 })
 
 const directors = computed(() => {
-  return [...new Set(props.movies.map((movie) => movie.director))]
+  return uniqueValues(props.movies.map((movie) => movie.director))
 })
 
 const languages = computed(() => {
-  return [...new Set(props.movies.map((movie) => movie.idioma))]
+  return uniqueValues(props.movies.map((movie) => movie.idioma))
 })
 
 const countries = computed(() => {
-  return [...new Set(props.movies.map((movie) => movie.pais))]
+  return uniqueValues(props.movies.map((movie) => movie.pais))
 })
 
 const ageRatings = computed(() => {
-  return [
-    ...new Set(
-      props.movies.map((movie) => movie.clasificacion_edad),
-    ),
-  ]
+  return uniqueValues(props.movies.map((movie) => movie.clasificacion_edad))
 })
 
 const applyFilters = () => {
   const filteredMovies = props.movies.filter((movie) => {
-    const titleMatch = movie.titulo
-      .toLowerCase()
-      .includes(filters.titulo.toLowerCase())
+    const titleMatch = normalize(movie.titulo).includes(normalize(filters.titulo))
 
     const genreMatch =
-      !filters.genero || movie.genero === filters.genero
+      !filters.genero || includesValue(movie.genero, filters.genero)
 
     const directorMatch =
-      !filters.director || movie.director === filters.director
+      !filters.director || includesValue(movie.director, filters.director)
 
     const languageMatch =
-      !filters.idioma || movie.idioma === filters.idioma
+      !filters.idioma || includesValue(movie.idioma, filters.idioma)
 
     const countryMatch =
-      !filters.pais || movie.pais === filters.pais
+      !filters.pais || includesValue(movie.pais, filters.pais)
 
     const ageMatch =
       !filters.clasificacion_edad ||
-      movie.clasificacion_edad === filters.clasificacion_edad
+      includesValue(movie.clasificacion_edad, filters.clasificacion_edad)
 
     const minRatingMatch =
       filters.calificacionMin === '' ||
