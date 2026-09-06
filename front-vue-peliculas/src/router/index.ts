@@ -19,6 +19,21 @@ export const router = createRouter({
       component: () => import('../views/MoviesView.vue'),
       meta: { requiresAuth: true },
     },
+    {
+      path: '/movies/create',
+      component: () => import('../views/CreateMovieView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/movies/:id',
+      component: () => import('../views/MovieDetailView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/movies/:id/edit',
+      component: () => import('../views/CreateMovieView.vue'),
+      meta: { requiresAuth: true },
+    },
   ],
 })
 

@@ -12,7 +12,7 @@ import type { StringValue } from 'ms';
 @Module({
   imports: [
     UsersModule,
-    JwtModule.registerAsync({
+    JwtModule.registerAsync({ 
       imports: [ConfigModule],
       global: true,
       inject: [ConfigService],
